@@ -21,6 +21,42 @@ final class ArticleController extends AbstractController
         ]);
     }
 
+    #[Route('/article/save', name: 'app_article_save', methods: ['POST'])]
+    public function save(Request $request, DocumentManager $dm): Response
+    {
+        if ($request->request->has('id') && !empty($request->request->get('id'))) {
+            $id = $request->request->get('id');
+            dump("id : ", $id);
+            $article = $dm->getRepository(Article::class)->find($id);
+            dump("article : ", $article);
+
+            if (!$article) {
+                throw $this->createNotFoundException('Article introuvable pour l\'ID : ' . $id);
+            }
+        } else {
+            $article = new Article();
+            $dm->persist($article);
+        }
+
+        $title = $request->request->get('title');
+        $desc = $request->request->get('desc');
+        $author = $request->request->get('author');
+        $imgPath = $request->request->get('imgPath');
+
+        if ($title !== null) $article->setTitle($title);
+        if ($desc !== null) $article->setDesc($desc);
+        if ($author !== null) $article->setAuthor($author);
+        if ($imgPath !== null) $article->setImgPath($imgPath);
+
+        try {
+            $dm->flush();
+        } catch (\Exception $e) {
+            return new Response("Erreur lors de la sauvegarde : " . $e->getMessage(), 500);
+        }
+
+        return $this->redirectToRoute('app_article');
+    }
+
     #[Route('/article/{id}', name: 'app_article_show')]
     public function show(string $id, DocumentManager $dm): Response
     {
@@ -44,41 +80,6 @@ final class ArticleController extends AbstractController
             $dm->remove($article);
             $dm->flush();
         }
-
-        return $this->redirectToRoute('app_article');
-    }
-
-    #[Route('/article/save', name: 'app_article_save', methods: ['POST'])]
-    public function save(Request $request, DocumentManager $dm): Response
-    {
-        // On récupère l'ID s'il existe
-        $id = $request->request->get('id');
-
-        // Si l'ID est présent et non vide, on cherche l'article, sinon on en crée un nouveau
-        $article = ($id && trim($id) !== '') ? $dm->getRepository(Article::class)->find($id) : new Article();
-
-        if (!$article) {
-            throw $this->createNotFoundException('Article introuvable pour modification');
-        }
-
-        // Récupération des données (on utilise 'desc' pour correspondre à ton Postman)
-        $title = $request->request->get('title');
-        $desc = $request->request->get('desc'); // Harmonisé ici
-        $author = $request->request->get('author');
-        $imgPath = $request->request->get('imgPath');
-
-        // On ne met à jour que si la donnée est fournie
-        if ($title) $article->setTitle($title);
-        if ($desc) $article->setDesc($desc); // Assure-toi que la méthode s'appelle bien setDesc dans ton Document Article
-        if ($author) $article->setAuthor($author);
-        if ($imgPath) $article->setImgPath($imgPath);
-
-        // Si c'est un nouvel article (pas d'ID), on persiste
-        if (!$id || trim($id) === '') {
-            $dm->persist($article);
-        }
-
-        $dm->flush();
 
         return $this->redirectToRoute('app_article');
     }
