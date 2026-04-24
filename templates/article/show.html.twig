@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>{{ article.title }}</h1>
+    <img src="{{ article.imgPath }}" alt="{{ article.title }}" style="width: 300px;">
+    <p><strong>Auteur :</strong> {{ article.author }}</p>
+    <p>{{ article.desc }}</p>
+
+    <a href="{{ path('app_article_save', {'id': article.id}) }}">Modifier</a>
+
+    <a href="{{ path('app_article_delete', {'id': article.id}) }}"
+       onclick="return confirm('Voulez-vous vraiment supprimer cet article ?')">
+        Supprimer
+    </a>
+
+    <a href="{{ path('app_article') }}">Retour à la liste</a>
+{% endblock %}

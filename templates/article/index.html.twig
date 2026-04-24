@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block stylesheets %}
-    {{ parent() }} {# Garde le app.css chargé dans base.html.twig #}
+    {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/articles.css') }}">
 {% endblock %}
 
@@ -10,11 +10,13 @@
 {% block body %}
     <h3>Mes Articles</h3>
 
+    <a href="{{ path('app_article_save') }}" class="btn-add">Ajouter un Article</a>
+
     <div class="articles-list">
         {% for article in liste_articles %}
-            <div class="article-card">
+            <div class="article-card" onclick="window.location.href='{{ path('app_article_show', {'id': article.id}) }}'" style="cursor: pointer;">
                 <h4>{{ article.title }}</h4>
-                <p>{{ article.desc }} {{ article.author }}</p>
+                <p>{{ article.desc }} par {{ article.author }}</p>
                 <img src="{{ article.imgPath }}" alt="{{ article.title }}">
             </div>
         {% else %}
